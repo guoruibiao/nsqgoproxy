@@ -45,4 +45,36 @@ func main() {
     // serve
     nsqgoproxy.Serve()
 }
+// 然后在命令行里跑起来
+go run run-nsq-go-proxy.go
+```
+
+## 部署
+拷贝一份Nginx配置，如下：
+
+```
+server {
+
+    server_name nsqgoproxy.yourdomain.com;
+    listen 80;
+    access_log /var/log/nginx/nsqgoproxy.access.log;
+    error_log /var/log/nginx/nsqgoproxy.error.log;
+
+    location / {
+        proxy_pass http://localhost:9999;
+    }
+}
+```
+弄完之后重启下Nginx服务，让新的配置生效。这样就可以如下去访问：
+```
+➜  ~ curl http://nsqgoproxy.yourdomain.com/
+
+    请求格式：
+        1. 首页
+        http://nsqgoproxy.yourdomain.com/
+
+        2. 添加消费事件
+        http://nsqgoproxy.yourdomain.com/publish?classname=DemoService&methodname=say&name=tiger
+
+➜  ~
 ```
