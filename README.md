@@ -31,3 +31,18 @@ go get github.com/guoruibiao/gorequests
 ```
 go test -v ./...
 ```
+
+## 实际应用
+```
+// run-nsq-go-proxy.go
+package main
+
+import (
+    "github.com/guoruibiao/nsqgoproxy"
+)
+
+func main() {
+    // serve
+    nsqgoproxy.Serve()
+}
+```

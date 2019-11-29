@@ -9,4 +9,7 @@ const (
 
 	// PHP-FPM 测试机位置
 	PHP_FPM_ADDR = "http://localhost/guoruibiao/201908/fpm.php"
+
+	// Server 对外服务端口
+	SERVER_PORT = 9999
 )

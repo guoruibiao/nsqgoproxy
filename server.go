@@ -45,7 +45,10 @@ func (p *NSQProxy) AddEvent(e Entity) (bool, error) {
 	writer := bytes.NewBuffer(nil)
 	encoder := json.NewEncoder(writer)
 	encoder.Encode(e)
-	p.producer.Publish(e.TopicName, writer.Bytes())
+	go func() {
+		p.producer.Publish(e.TopicName, writer.Bytes())
+		p.waitgroup.Add(1)
+	}()
 	return true, nil
 }
 
@@ -56,8 +59,10 @@ func (p *NSQProxy) GetEvent(topicName string) (e *Entity, err error) {
 	}
 	consumer.AddHandler(nsq.HandlerFunc(func(msg *nsq.Message) error {
 		fmt.Println("message: ", string((msg.Body)))
-		PHPHandler(string(msg.Body))
-		// TODO 在此处做消费处理
+		go func() {
+			PHPHandler(string(msg.Body))
+			p.waitgroup.Done()
+		}()
 		return nil
 	}))
 	err = consumer.ConnectToNSQD(NSQ_ADDR)
@@ -66,7 +71,8 @@ func (p *NSQProxy) GetEvent(topicName string) (e *Entity, err error) {
 		os.Exit(0)
 	}
 	// 消费者等待上方handler处理
-	<- make(chan bool)
+	//<- make(chan bool)
+	p.waitgroup.Wait()
 	fmt.Println("consumer consumed.")
 	return
 }
