@@ -46,7 +46,11 @@ func (p *NSQProxy) AddEvent(e Entity) (bool, error) {
 	encoder := json.NewEncoder(writer)
 	encoder.Encode(e)
 	go func() {
-		p.producer.Publish(e.TopicName, writer.Bytes())
+		if e.Duration > 0 {
+			p.producer.DeferredPublish(e.TopicName, e.Duration, writer.Bytes())
+		}else{
+			p.producer.Publish(e.TopicName, writer.Bytes())
+		}
 		p.waitgroup.Add(1)
 	}()
 	return true, nil

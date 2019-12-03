@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strconv"
 	"os"
+	"time"
 )
 
 var nsqProxy *NSQProxy
@@ -33,10 +34,13 @@ func Serve() {
 
 func publish(writer http.ResponseWriter, request *http.Request) {
 	queryMap := request.URL.Query()
+	delayTime, _ := strconv.Atoi(queryMap.Get("delaytime"))
 	e := &Entity{
 		"topicname",
 		queryMap.Get("classname"),
 		queryMap.Get("methodname"),
+		// 类型蛮重要，记得好好写
+		time.Duration(delayTime) * time.Second,
 		[]string{queryMap.Get("name")},
 	}
 	if ok, err := nsqProxy.AddEvent(*e); ok == false {
